@@ -6,6 +6,7 @@
 (n/enable-util-print!)
 
 (defn -main []
-  (println "hi there"))
+  (println (= (js/Buffer #js [1 2 3 4])
+              (js/Buffer #js [1 2 3]))))
 
 (set! *main-cli-fn* -main)
