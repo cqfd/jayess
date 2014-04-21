@@ -8,7 +8,11 @@
 (def B js/Buffer)
 (def tcp (n/require "net"))
 
-(defn channelize [conn]
+(defn channelize
+  "socket -> chan buf
+
+  Returns a channel that yields data received from a socket."
+  [conn]
   (let [c (chan)]
     (. conn (on "error" (fn [_] (close! c))))
     (. conn (on "end" (fn [] (close! c))))
@@ -20,7 +24,12 @@
                                          (. conn destroy)))))))
     c))
 
-(defn lines [in]
+(defn lines
+  "chan buf -> chan buf
+
+  Takes a channel that yields arbitrary buffers and returns a channel
+  that yields new-line delimited buffers."
+  [in]
   (let [out (chan)]
     (go (loop [line (B. 0) buf (<! in) i 0]
           (cond
