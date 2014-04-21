@@ -50,10 +50,6 @@
 
 (defn -main []
   (let [server (. tcp createServer)]
-    (go (let [c (chan)]
-          (close! c)
-          (put! c "hmm" (fn [wat]
-                          (. js/console (log "wat" wat))))))
     (. server (on "connection" echo-lines))
     (. server (listen 45678))))
 
