@@ -24,10 +24,20 @@
   (let [out (chan)]
     (go (loop [line (B. 0) buf (<! in) i 0]
           (cond
-           (nil? buf) (close! out)
-           (>= i (. buf -length)) (recur (. B (concat (array line buf))) (<! in) 0)
-           (= 0xa (aget buf i)) (do (>! out (. B (concat (array line (. buf (slice 0 (inc i)))))))
-                                    (recur (B. 0) (. buf (slice (inc i))) (inc i)))
+           (nil? buf)
+           (close! out)
+
+           (>= i (. buf -length))
+           (let [bigger-line (. B (concat (array line buf)))
+                 new-buf (<! in)]
+             (recur bigger-line new-buf 0))
+
+           (= 0xa (aget buf i))
+           (let [end-of-line (. buf (slice 0 (inc i)))
+                 rest-of-buf (. buf (slice (inc i)))]
+             (>! out (. B (concat (array line end-of-line))))
+             (recur (B. 0) rest-of-buf (inc i)))
+           
            :else (recur line buf (inc i)))))
     out))
 
